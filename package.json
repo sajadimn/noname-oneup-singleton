@@ -1,0 +1,34 @@
+{
+  "name": "noname-oneup-singleton",
+  "displayName": "Singleton",
+  "version": "1.0.0",
+  "unity": "2019.2",
+  "license": "Copyright (c) Noname.OneUp All rights reserved. ",
+  "type": "Tools",
+  "category": "Utilities",
+  "description": "This package contains a utility to ensure that a class has only one instance and is easily accessible from anywhere and that instance doesn't destroy when you switch between the scenes.",
+  "dependencies": {},
+  "gitDependencies": {},
+  "samples": [],
+  "hideInEditor": true,
+  "keywords": [
+    "Noname",
+    "OneUp",
+    "Utilities",
+    "Singleton",
+    "MonoSingleton",
+    "Tools"
+  ],
+  "author": {
+    "name": "OneUp",
+    "email": "imani.sajad92@gmail.com",
+    "url": "https://github.com/sajadimn"
+  },
+  "repository": {
+    "url": "https://github.com/sajadimn/noname-oneup-singleton.git",
+    "type": "git"
+  },
+  "publishConfig": {
+    "registry": "https://github.com/sajadimn/noname-oneup-singleton"
+  }
+}
