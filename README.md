@@ -1,4 +1,4 @@
-Singleton
+Singleton Unity Package
 ===
 
 ## Description
@@ -10,7 +10,7 @@ Just copy the link below and add it to your project via Unity Package Manager: [
 https://github.com/sajadimn/noname-oneup-singleton.git
 ```
 
-## Problem
+## Benefits
 The Singleton pattern solves three problems at the same time, violating the Single Responsibility Principle:
 
 ### 1-Ensure that a class has just a single instance.
