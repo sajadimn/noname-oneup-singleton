@@ -2,97 +2,100 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Noname.OneUp.Packages.Singleton
+/// <summary>
+/// Inherit from this base class to create a MonoSingleton.
+/// e.g. public class MyClassName : MonoSingleton<MyClassName> {}
+/// </summary>
+public class MonoSingleton<T> : MonoBehaviour where T : MonoBehaviour
 {
-    /// <summary>
-    /// Inherit from this base class to create a MonoSingleton.
-    /// e.g. public class MyClassName : MonoSingleton<MyClassName> {}
-    /// </summary>
-    public class MonoSingleton<T> : MonoBehaviour where T : MonoBehaviour
+    private static bool isQuiting;
+    private static object lockObject = new object();
+    private static T instance;
+    private bool created;
+    public static List<T> allMonoSingletons { get; } = new List<T>();
+
+    protected virtual void Awake()
     {
-        private static bool isQuiting;
-        private static object lockObject = new object();
-        private static T instance;
-        private bool created;
+        gameObject.name = MonoSingleton<T>.Instance.name;
+    }
 
-        protected virtual void Awake()
+    public static T Instance
+    {
+        get
         {
-            MonoSingleton<T>.Instance.name = MonoSingleton<T>.Instance.name + ":MonoSingleton";
-        }
+            if (Application.isEditor && !Application.isPlaying)
+                return null;
 
-        public static T Instance
-        {
-            get
+            if (isQuiting)
             {
-                if (Application.isEditor && !Application.isPlaying)
-                    return null;
+                Debug.LogWarning($"MonoSingleton {typeof(T)} Already Destroyed");
+                return null;
+            }
 
-                if (isQuiting)
+            lock (lockObject)
+            {
+                bool firstInit = instance == null;
+                if (instance == null)
                 {
-                    Debug.LogWarning(string.Format("MonoSingleton {0} Already Destroyed", typeof(T)));
-                    return null;
-                }
+                    instance = (T) FindObjectOfType(typeof(T));
 
-                lock (lockObject)
-                {
-                    bool firstInit = instance == null;
                     if (instance == null)
                     {
-                        instance = (T) FindObjectOfType(typeof(T));
-
-                        if (instance == null)
+                        string name = typeof(T).Name;
+                        GameObject prefab = Resources.Load<GameObject>(name);
+                        if (prefab != null)
                         {
-                            string name = typeof(T).Name;
-                            GameObject prefab = Resources.Load<GameObject>(name);
-                            if (prefab != null)
-                            {
-                                instance = Instantiate(prefab).GetComponent<T>();
-                            }
-                            else
-                            {
-                                instance = new GameObject(name).AddComponent<T>();
-                            }
-
-                            instance.gameObject.name = name;
+                            instance = Instantiate(prefab).GetComponent<T>();
                         }
-                    }
+                        else
+                        {
+                            instance = new GameObject(name).AddComponent<T>();
+                        }
 
-                    if (firstInit)
-                    {
-                        Debug.Log(string.Format("MonoSingleton {0} Created Right Now", typeof(T)));
-                        DontDestroyOnLoad(instance.gameObject);
-                        (instance as MonoSingleton<T>).created = true;
-                        (instance as MonoSingleton<T>).OnCreateSingleton();
+                        instance.gameObject.name = MonoSingleton<T>.Instance.name;
                     }
-
-                    return instance;
                 }
+
+                if (firstInit)
+                {
+                    Debug.Log($"MonoSingleton {typeof(T)} Created Right Now");
+                    DontDestroyOnLoad(instance.gameObject);
+                    allMonoSingletons.Add(instance);
+                    ((instance as MonoSingleton<T>)!).created = true;
+                    ((instance as MonoSingleton<T>)!).OnCreateSingleton();
+                }
+
+                return instance;
             }
         }
+    }
 
-        private void OnApplicationQuit()
-        {
-            if (!Application.isEditor)
-                isQuiting = true;
-        }
+    public void Destroy()
+    {
+        instance = null;
+        Destroy(this.gameObject);
+    }
 
-        private void OnDestroy()
-        {
-            if (!created)
-                return;
+    private void OnApplicationQuit()
+    {
+        OnDestroy();
+        if (!Application.isEditor)
+            isQuiting = true;
+    }
 
-            OnDestroySingleton();
+    private void OnDestroy()
+    {
+        if (!created)
+            return;
+        created = false;
+        OnDestroySingleton();
+    }
 
-            if (!Application.isEditor)
-                isQuiting = true;
-        }
+    protected virtual void OnCreateSingleton()
+    {
+    }
 
-        protected virtual void OnCreateSingleton()
-        {
-        }
-
-        protected virtual void OnDestroySingleton()
-        {
-        }
+    protected virtual void OnDestroySingleton()
+    {
     }
 }
